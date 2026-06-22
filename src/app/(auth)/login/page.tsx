@@ -23,11 +23,13 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field"
+import { useRouter } from 'next/navigation';
 
 
 export default function Login() {
-
-  const [ showPassword, setShowPassword ] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -39,17 +41,23 @@ export default function Login() {
  
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
+      setLoading(true);
       const res = (
         await api.post<ApiResponse>("/auth/login", data)
       ).data
 
       console.log(res)
+      router.push("/home");
 
     } catch (err: unknown) {
 
       if (axios.isAxiosError<ApiResponse>(err)) {
         console.log(err.response?.data.message);
       }
+    }
+    finally {
+      setLoading(false);
+      form.reset()
     }
   }
   
@@ -100,7 +108,7 @@ export default function Login() {
                   />
 
                   <Controller
-                    name="identifier"
+                    name="password"
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
@@ -137,7 +145,14 @@ export default function Login() {
                     )}
                   />
                   <Field>
-                    <Button form="login-form" type="submit">Login</Button>
+                    <Button form="login-form" type="submit" disabled={loading}>
+                      {loading ? (
+                        <>
+                          Logging in
+                          <span className="loading loading-spinner loading-sm"></span>
+                        </>
+                      ) : "Login"}
+                    </Button>
                   </Field>
                   <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                     Or 

@@ -23,10 +23,12 @@ import { api } from "@/lib/api"
 import { signupSchema } from "@/schemas/signupSchema"
 import { ApiResponse } from "@/types/ApiResponse"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 export default function Signup() {
-
-  const [ showPassword, setShowPassword ] = useState(false)
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -40,6 +42,7 @@ export default function Signup() {
  
   const onSubmit = async (data: z.infer<typeof signupSchema>) => {
     try {
+      setLoading(true);
       const res = (
         await api.post<ApiResponse>("/auth/register", data)
       ).data
@@ -49,7 +52,7 @@ export default function Signup() {
           action: {
             label: "Log in",
             onClick: () => {
-              window.location.href = "/login"
+              router.push("/login");
             }
           } ,
           position: "bottom-right"
@@ -64,6 +67,7 @@ export default function Signup() {
     }
     finally {
       form.reset()
+      setLoading(false);
     }
   }
 
@@ -127,7 +131,14 @@ export default function Signup() {
                     </Field>
                   </Field>
                   <Field>
-                    <Button type="submit">Create Account</Button>
+                    <Button type="submit" disabled={loading}>
+                      {loading ? (
+                        <>
+                          Creating account
+                          <span className="loading loading-spinner loading-sm"></span>
+                        </>
+                      ) : "Create Account"}
+                    </Button>
                   </Field>
                   <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                     Or

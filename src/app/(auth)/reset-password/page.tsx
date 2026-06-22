@@ -28,7 +28,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const ResetPasswordFormSchema = z.object({
   newPassword: z.string().min(8, "Password must be at least 8 characters long"),
@@ -36,6 +36,8 @@ const ResetPasswordFormSchema = z.object({
 
 export default function ResetPassword() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [ showPassword, setShowPassword ] = useState(false)
 
   const form = useForm<z.infer<typeof ResetPasswordFormSchema>>({
@@ -44,6 +46,7 @@ export default function ResetPassword() {
   
   const onSubmit = async (data: z.infer<typeof ResetPasswordFormSchema>) => {
     try {
+      setLoading(true);
       const res = (
         await api.post<ApiResponse>("/auth/reset-password", {
           token: searchParams.get("token"),
@@ -52,13 +55,16 @@ export default function ResetPassword() {
         })
       ).data
 
-      console.log("Response", res)
+      router.replace("/login");
 
     } catch (err: unknown) {
 
       if (axios.isAxiosError<ApiResponse>(err)) {
         console.log("Error /auth/reset-password:", err.response?.data.message);
       }
+    } finally {
+      form.reset();
+      setLoading(false);
     }
   }
     
@@ -108,8 +114,13 @@ export default function ResetPassword() {
                     Your new password must be at least 8 characters long.
                   </FieldDescription>
                   <Field>
-                    <Button form="reset-password-form" type="submit">
-                      Reset Password
+                    <Button form="reset-password-form" type="submit" disabled={loading}>
+                      {loading ? (
+                        <>
+                          Resetting password
+                          <span className="loading loading-spinner loading-sm"></span>
+                        </>
+                      ) : "Reset Password"}
                     </Button>
                   </Field>
                 </FieldGroup>
