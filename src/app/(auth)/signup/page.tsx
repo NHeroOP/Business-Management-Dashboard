@@ -4,7 +4,7 @@ import * as z from "zod"
 import axios from 'axios'
 import Image from 'next/image'
 import { useState } from 'react'
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { Eye, EyeOff } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
 
@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -76,21 +77,20 @@ export default function Signup() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+    <div className="flex relative min-h-svh flex-col items-center justify-center p-6 md:p-10">
       <Image
         src="/images/bg2.jpg"
         alt="Background"
-        width={0}
-        height={0}
+        fill
         sizes="100vw"
-        className="absolute inset-0 z-[-1] object-cover h-full w-full"
+        className="absolute inset-0 object-cover h-full w-full"
       />
 
-      <div className="w-full max-w-sm md:max-w-4xl">
+      <div className="w-full max-w-sm z-1 md:max-w-4xl">
         <div className="flex flex-col gap-6">
           <Card className="overflow-hidden p-0">
             <CardContent className="grid p-0 md:grid-cols-2">
-              <form className="p-6 md:p-8"  onSubmit={form.handleSubmit(onSubmit)}>
+              <form className="p-6 md:p-8" id="signup-form" onSubmit={form.handleSubmit(onSubmit)}>
                 <FieldGroup className="gap-5">
                   <div className="flex flex-col items-center gap-2 text-center">
                     <h1 className="text-2xl font-bold">Create your account</h1>
@@ -98,40 +98,98 @@ export default function Signup() {
                       Enter your information below to create your account
                     </p>
                   </div>
+
+                  <Controller
+                    name="username"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="username">Username</FieldLabel>
+                        <Input
+                          {...field}
+                          id="username"
+                          type="text"
+                          placeholder="john_doe"
+                          defaultValue="johndoe"
+                          required
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name="name"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="name">Full Name</FieldLabel>
+                        <Input
+                          {...field}
+                          id="name"
+                          type="text"
+                          placeholder="John Doe"
+                          defaultValue="John Doe"
+                          required
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name="email"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="email">Email</FieldLabel>
+                        <Input
+                          {...field}
+                          id="email"
+                          type="email"
+                          placeholder="m@example.com"
+                          defaultValue="john.doe@example.com"
+                          required
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name="password"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="password">Password</FieldLabel>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="password123"
+                            defaultValue="password123"
+                            required
+                          />
+                          <button
+                            className="absolute right-2 top-1/2 -translate-y-1/2"
+                            type="button"
+                            onClick={changePasswordVisibility}
+                          >
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
                   <Field>
-                    <FieldLabel htmlFor="username">Username</FieldLabel>
-                    <Input id="username" type="text" placeholder="john_doe" defaultValue="johndoe" required />
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="name">Full Name</FieldLabel>
-                    <Input id="name" type="text" placeholder="John Doe" defaultValue="John Doe" required />
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="email">Email</FieldLabel>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="m@example.com"
-                      defaultValue="john.doe@example.com"
-                      required
-                    />
-                  </Field>
-                  <Field>
-                    <Field>
-                      <FieldLabel htmlFor="password">Password</FieldLabel>
-                      <div className="relative">
-                        <Input id="password" type={showPassword ? "text" : "password"} defaultValue="password123" required />
-                        <button
-                          className="absolute right-2 top-1/2 -translate-y-1/2"
-                          onClick={changePasswordVisibility}
-                        >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
-                    </Field>
-                  </Field>
-                  <Field>
-                    <Button type="submit" disabled={loading}>
+                    <Button form="signup-form" type="submit" disabled={loading}>
                       {loading ? (
                         <>
                           Creating account

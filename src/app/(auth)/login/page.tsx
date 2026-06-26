@@ -50,7 +50,7 @@ export default function Login() {
       router.push("/home");
 
     } catch (err: unknown) {
-
+      console.log("err /login", err)
       if (axios.isAxiosError<ApiResponse>(err)) {
         console.log(err.response?.data.message);
       }
@@ -62,16 +62,15 @@ export default function Login() {
   }
   
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
-    <Image
-      src="/images/bg1.jpg"
-      alt="Background"
-      width={0}
-      height={0}
-      sizes="100vw"
-      className="absolute inset-0 z-[-1] object-cover h-full w-full"
-    />
-      <div className="w-full max-w-sm md:max-w-4xl">
+    <div className="flex relative min-h-svh flex-col items-center justify-center p-6 md:p-10">
+      <Image
+        src="/images/bg1.jpg"
+        alt="Background"
+        fill
+        sizes="100vw"
+        className="absolute inset-0 object-cover h-full w-full"
+      />
+      <div className="w-full z-1 max-w-sm md:max-w-4xl">
         <div className="flex flex-col gap-6">
           <Card className="overflow-hidden p-0">
             <CardContent className="grid p-0 md:grid-cols-2">
@@ -94,7 +93,6 @@ export default function Login() {
                           id="identifier"
                           type="text"
                           placeholder="m@example.com or john_doe"
-                          defaultValue="johndoe"
                           required
                         />
                         {fieldState.invalid && (
@@ -126,7 +124,6 @@ export default function Login() {
                             {...field}
                             id="password"
                             type={showPassword ? "text" : "password"}
-                            defaultValue="password123"
                             required
                           />
                           <button
